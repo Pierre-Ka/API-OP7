@@ -1,7 +1,6 @@
 <?php
 namespace App\Entity\Traits ;
 
-use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /*
@@ -13,38 +12,38 @@ use Doctrine\ORM\Mapping as ORM;
 trait Timestampable
 {
     #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTimeInterface $createDate = null;
+    private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTimeInterface $lastUpdate = null;
+    private ?\DateTimeInterface $UpdatedAt = null;
 
-    public function getCreateDate(): ?\DateTimeInterface
+    public function getCreatedAt(): ?\DateTimeInterface
     {
-        return $this->createDate;
-    }
-
-    #[ORM\PrePersist]
-    public function setCreateDateAtValue(): void
-    {
-        $this->createDate = new \DateTime();
-    }
-    public function setCreateDate($createDate): void
-    {
-        $this->createDate = $createDate;
+        return $this->createdAt;
     }
 
-    public function getLastUpdate(): ?\DateTimeInterface
+//    #[ORM\PrePersist]
+    public function setCreatedAtAtValue(): void
     {
-        return $this->lastUpdate;
+        $this->createdAt = new \DateTime();
+    }
+    public function setCreatedAt($createdAt): void
+    {
+        $this->createdAt = $createdAt;
     }
 
-    #[ORM\PreUpdate]
-    public function setLastUpdateAtValue(): void
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
-        $this->lastUpdate = new \DateTime();
+        return $this->UpdatedAt;
     }
-    public function setLastUpdate($lastUpdate): void
+
+//    #[ORM\PreUpdate]
+    public function setUpdatedAtAtValue(): void
     {
-        $this->lastUpdate = $lastUpdate;
+        $this->UpdatedAt = new \DateTime();
+    }
+    public function setUpdatedAt($UpdatedAt): void
+    {
+        $this->UpdatedAt = $UpdatedAt;
     }
 }
