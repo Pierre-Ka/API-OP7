@@ -21,13 +21,19 @@ class ClientFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create('fr_FR');
-        for ($i = 0; $i <= self::NUMBER_OF_CLIENT; $i++) {
+        for ($i = 0; $i < self::NUMBER_OF_CLIENT; $i++) {
             $client = new Client();
             $client->setEmail($faker->email());
-            $client->setName($faker->domainName());
+            $client->setName($faker->company());
             $password = $this->hasher->hashPassword($client, 'secret');
             $client->setPassword($password);
-//          $user->setCreateDate($faker->dateTimeThisDecade());
+            $client->setCreatedAt($faker->dateTimeThisDecade());
+            $lastTransaction = $faker->dateTimeThisDecade();
+            if ( $client->getCreatedAt() < $lastTransaction )
+            {
+                $client->setLastTransaction($lastTransaction);
+                $client->setUpdatedAt($lastTransaction);
+            }
             $manager->persist($client);
             $this->addReference('client_'.$i, $client);
         }
