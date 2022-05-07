@@ -5,10 +5,13 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Traits\Timestampable;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['email'], message: 'Un utilisateur possède dejà cet email !')]
 class User
 {
     use Timestampable;
@@ -21,19 +24,24 @@ class User
 
     #[ORM\ManyToOne(targetEntity: Client::class, inversedBy: 'users')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["show_user"])]
     private Client $client;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups(["list_user", "show_user"])]
+    #[Assert\NotBlank(message: 'L\'utilisateur doit avoir un prenom')]
+    #[Assert\Length(min: 3, minMessage: 'Le prenom n\'est pas assez long', max: 100, maxMessage: 'Le nom doit être inferieur à 100 caractères')]
     private string $firstName;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups(["list_user", "show_user"])]
+    #[Assert\NotBlank(message: 'L\'utilisateur doit avoir un nom')]
+    #[Assert\Length(min: 2, minMessage: 'Le nom n\'est pas assez long', max: 100, maxMessage: 'Le nom doit être inferieur à 100 caractères')]
     private string $lastName;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
     #[Groups(["list_user", "show_user"])]
+    #[Assert\NotBlank(message: 'L\'email doit être renseigné')]
+    #[Assert\Email(message:'Entrer un email valide')]
     private string $email;
 
     public function getId(): ?int
