@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UserController extends AbstractController
 {
@@ -21,15 +22,18 @@ class UserController extends AbstractController
     }
 
     #[Route('/clients/{id}/users/{user_id}', name: 'app_item_user', methods: ['GET'])]
-//    #[Entity('user', expr: 'repository.find(user_id)')]
     #[Entity('user', options: ['id' => 'user_id'])]
     public function show(Client $client, User $user): JsonResponse
     {
+        if ($user->getClient() !== $client)
+        {
+            return $this->json(null, JsonResponse::HTTP_BAD_REQUEST);
+        }
         return $this->json($user, JsonResponse::HTTP_OK, [], ['groups' => 'show_user']);
     }
 
     #[Route('/clients/{id}/users', name: 'app_create_user', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $em, Client $client): JsonResponse
+    public function create(Request $request, EntityManagerInterface $em, Client $client, ValidatorInterface $validator): JsonResponse
     {
         $data = $request->toArray();
         $user = new User();
@@ -37,17 +41,24 @@ class UserController extends AbstractController
         $user->setFirstName($data['firstName']);
         $user->setLastName($data['lastName']);
         $user->setClient($client);
+        $errors = $validator->validate($user);
+        if($errors->count()>0) {
+            return $this->json($errors, JsonResponse::HTTP_BAD_REQUEST);
+        }
         $em->persist($user);
         $em->flush();
 
-        return $this->json($user, JsonResponse::HTTP_CREATED);
+        return $this->json($user, JsonResponse::HTTP_CREATED, [], ['groups' => 'show_user']);
     }
 
     #[Route('/clients/{id}/users/{user_id}', name: 'app_delete_user', methods: ['DELETE'])]
-//    #[Entity('user', expr: 'repository.find(user_id)')]
     #[Entity('user', options: ['id' => 'user_id'])]
     public function delete(Client $client, User $user, EntityManagerInterface $em): JsonResponse
     {
+        if ($user->getClient() !== $client)
+        {
+            return $this->json(null, JsonResponse::HTTP_BAD_REQUEST);
+        }
         $em->remove($user);
         $em->flush();
 
