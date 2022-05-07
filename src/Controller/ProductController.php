@@ -14,12 +14,12 @@ class ProductController extends AbstractController
     public function list(ProductRepository $productRepository): JsonResponse
     {
         $products = $productRepository->findAll();
-        return $this->json($products, JsonResponse::HTTP_OK);
+        return $this->json($products, JsonResponse::HTTP_OK, [], ['groups' => 'list_product']);
     }
 
     #[Route('/products/{id}', name: 'app_item_product', methods: ['GET'])]
     public function show(Product $product): JsonResponse
     {
-        return $this->json($product, JsonResponse::HTTP_OK);
+        return $this->json($product, JsonResponse::HTTP_OK, [], ['groups' => 'show_product']);
     }
 }
