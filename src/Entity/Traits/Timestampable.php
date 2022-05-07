@@ -2,6 +2,7 @@
 namespace App\Entity\Traits ;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /*
     Pour pouvoir utiliser ce trait :
@@ -12,9 +13,11 @@ use Doctrine\ORM\Mapping as ORM;
 trait Timestampable
 {
     #[ORM\Column(type: 'datetime', nullable: true)]
+    #[Groups(["show_product", "show_client"])]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
+    #[Groups(["show_product", "show_client"])]
     private ?\DateTimeInterface $UpdatedAt = null;
 
     public function getCreatedAt(): ?\DateTimeInterface
@@ -22,7 +25,7 @@ trait Timestampable
         return $this->createdAt;
     }
 
-//    #[ORM\PrePersist]
+    #[ORM\PrePersist]
     public function setCreatedAtAtValue(): void
     {
         $this->createdAt = new \DateTime();
@@ -37,7 +40,7 @@ trait Timestampable
         return $this->UpdatedAt;
     }
 
-//    #[ORM\PreUpdate]
+    #[ORM\PreUpdate]
     public function setUpdatedAtAtValue(): void
     {
         $this->UpdatedAt = new \DateTime();

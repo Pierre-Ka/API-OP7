@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Traits\Timestampable;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -15,21 +16,27 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(["list_product", "show_product"])]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["list_product", "show_product"])]
     private string $brand;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["list_product", "show_product"])]
     private string $model;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["list_product", "show_product"])]
     private string $reference;
 
     #[ORM\Column(type: 'float', nullable: true)]
+    #[Groups(["list_product", "show_product"])]
     private float $price;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Groups("show_product")]
     private string $description;
 
     public function getId(): ?int

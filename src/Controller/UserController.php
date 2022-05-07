@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Client;
 use App\Entity\User;
-use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,22 +13,22 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class UserController extends AbstractController
 {
-    #[Route('/client/{id}/users', name: 'app_collection_user', methods: ['GET'])]
-    public function list(UserRepository $userRepository, Client $client): JsonResponse
+    #[Route('/clients/{id}/users', name: 'app_collection_user', methods: ['GET'])]
+    public function list(Client $client): JsonResponse
     {
-        $users = $userRepository->findBy([ "client" => $client ]);
-        return $this->json($users, JsonResponse::HTTP_OK);
+        $users = $client->getUsers();
+        return $this->json($users, JsonResponse::HTTP_OK, [], ['groups' => 'list_user']);
     }
 
-    #[Route('/client/{id}/users/{user_id}', name: 'app_item_user', methods: ['GET'])]
+    #[Route('/clients/{id}/users/{user_id}', name: 'app_item_user', methods: ['GET'])]
 //    #[Entity('user', expr: 'repository.find(user_id)')]
     #[Entity('user', options: ['id' => 'user_id'])]
     public function show(Client $client, User $user): JsonResponse
     {
-        return $this->json($user, JsonResponse::HTTP_OK);
+        return $this->json($user, JsonResponse::HTTP_OK, [], ['groups' => 'show_user']);
     }
 
-    #[Route('/client/{id}/users', name: 'app_create_user', methods: ['POST'])]
+    #[Route('/clients/{id}/users', name: 'app_create_user', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $em, Client $client): JsonResponse
     {
         $data = $request->toArray();
@@ -44,7 +43,7 @@ class UserController extends AbstractController
         return $this->json($user, JsonResponse::HTTP_CREATED);
     }
 
-    #[Route('/client/{id}/users/{user_id}', name: 'app_delete_user', methods: ['DELETE'])]
+    #[Route('/clients/{id}/users/{user_id}', name: 'app_delete_user', methods: ['DELETE'])]
 //    #[Entity('user', expr: 'repository.find(user_id)')]
     #[Entity('user', options: ['id' => 'user_id'])]
     public function delete(Client $client, User $user, EntityManagerInterface $em): JsonResponse

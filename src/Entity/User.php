@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Traits\Timestampable;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -15,19 +16,24 @@ class User
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(["list_user", "show_user"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Client::class, inversedBy: 'users')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["show_user"])]
     private Client $client;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["list_user", "show_user"])]
     private string $firstName;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["list_user", "show_user"])]
     private string $lastName;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["list_user", "show_user"])]
     private string $email;
 
     public function getId(): ?int

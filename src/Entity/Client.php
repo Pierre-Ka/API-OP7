@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use App\Entity\Traits\Timestampable;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CLientRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -19,12 +20,15 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups("show_client")]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["show_client", "show_user"])]
     private string $name;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups("show_client")]
     private string $email;
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -34,9 +38,11 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     private array $roles = [];
 
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: User::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[Groups(["list_user"])]
     private ?Collection $users = null;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
+    #[Groups("show_client")]
     private ?\DateTimeInterface $lastTransaction;
 
     public function __construct()
