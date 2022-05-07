@@ -1,8 +1,11 @@
-init-fixture:
-	@php bin/console --env=dev doctrine:database:drop -f -q --if-exists
-	@php bin/console --env=dev doctrine:database:create -q
-	@php bin/console --env=dev doctrine:migrations:migrate -q
-	@php bin/console --env=dev doctrine:fixtures:load -n -q
+database:
+	php bin/console doctrine:database:drop --if-exists --force --env=dev
+	php bin/console doctrine:database:create --env=dev
+	php bin/console doctrine:schema:update --force --env=dev
 
-fixtures: init-fixture
-	@php bin/console
+fixtures:
+	php bin/console doctrine:fixtures:load -n --env=dev
+
+prepare:
+	make database env=dev
+	make fixtures env=dev
