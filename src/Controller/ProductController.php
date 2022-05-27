@@ -6,14 +6,24 @@ use App\Entity\Product;
 use App\Repository\ProductRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/api')]
 class ProductController extends AbstractController
 {
     #[Route('/products', name: 'app_collection_product', methods: ['GET'])]
-    public function list(ProductRepository $productRepository): JsonResponse
+    public function list(Request $request, ProductRepository $productRepository): JsonResponse
     {
-        $products = $productRepository->findAll();
+        // niveau 3 de Richardson : pour chaque phone mettre un lien -> get item
+        $page = $request->query->get('page') ?? 1 ;
+        $productsCount = $productRepository->count([]);
+        $pageCount = round($productsCount/12);
+        if ($pageCount < $request->query->get('page')) {
+            $page = 1 ;
+        }
+        $products = $productRepository->findBy([], ['createdAt' => 'DESC'], 12, ($page-1)*12);
+
         return $this->json($products, JsonResponse::HTTP_OK, [], ['groups' => 'list_product']);
     }
 

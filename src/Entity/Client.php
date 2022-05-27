@@ -11,7 +11,6 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use App\Entity\Traits\Timestampable;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CLientRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -37,16 +36,11 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255)]
     private string $password;
 
-    #[ORM\Column(type: 'json')]
     private array $roles = [];
 
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: User::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[Groups(["list_user"])]
     private ?Collection $users = null;
-
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    #[Groups("show_client")]
-    private ?\DateTimeInterface $lastTransaction;
 
     public function __construct()
     {
@@ -95,16 +89,14 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return array_unique($roles);
     }
 
-    public function setRoles(array $roles): self
-    {
-        $this->roles = $roles;
-        return $this;
-    }
-
     public function eraseCredentials()
     {
     }
     public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+    public function getUsername(): string
     {
         return $this->email;
     }
@@ -131,14 +123,5 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
             }
         }
         return $this;
-    }
-    public function getLastTransaction(): ?\DateTimeInterface
-    {
-        return $this->lastTransaction;
-    }
-
-    public function setLastTransaction(?\DateTimeInterface $lastTransaction): void
-    {
-        $this->lastTransaction = $lastTransaction;
     }
 }

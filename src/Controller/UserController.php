@@ -2,60 +2,80 @@
 
 namespace App\Controller;
 
-use App\Entity\Client;
 use App\Entity\User;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Exception\NotEncodableValueException;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+#[Route('/api')]
 class UserController extends AbstractController
 {
-    #[Route('/clients/{id}/users', name: 'app_collection_user', methods: ['GET'])]
-    public function list(Client $client): JsonResponse
+    #[Route('/users', name: 'app_collection_user', methods: ['GET'])]
+    public function list(UserRepository $userRepository): JsonResponse
     {
-        $users = $client->getUsers();
+        /* faire la pagination , et niveau 3 de Richardson ( negociation ?? ) */
+        $users = $userRepository->findBy(['client' => $this->getUser()]);
         return $this->json($users, JsonResponse::HTTP_OK, [], ['groups' => 'list_user']);
     }
 
-    #[Route('/clients/{id}/users/{user_id}', name: 'app_item_user', methods: ['GET'])]
+    #[Route('/users/{user_id}', name: 'app_item_user', methods: ['GET'])]
     #[Entity('user', options: ['id' => 'user_id'])]
-    public function show(Client $client, User $user): JsonResponse
+    public function show(User $user): JsonResponse
     {
-        if ($user->getClient() !== $client)
+        if ($user->getClient() !== $this->getUser())
         {
             return $this->json(null, JsonResponse::HTTP_BAD_REQUEST);
         }
         return $this->json($user, JsonResponse::HTTP_OK, [], ['groups' => 'show_user']);
     }
 
-    #[Route('/clients/{id}/users', name: 'app_create_user', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $em, Client $client, ValidatorInterface $validator): JsonResponse
+    #[Route('/users', name: 'app_create_user', methods: ['POST'])]
+    public function create(
+        SerializerInterface $serializer,
+        Request $request,
+        EntityManagerInterface $em,
+        ValidatorInterface $validator): JsonResponse
     {
-        $data = $request->toArray();
-        $user = new User();
-        $user->setEmail($data['email']);
-        $user->setFirstName($data['firstName']);
-        $user->setLastName($data['lastName']);
-        $user->setClient($client);
-        $errors = $validator->validate($user);
-        if($errors->count()>0) {
-            return $this->json($errors, JsonResponse::HTTP_BAD_REQUEST);
-        }
-        $em->persist($user);
-        $em->flush();
+//        $data = $request->toArray();
+//        $user = new User();
+//        $user->setEmail($data['email']);
+//        $user->setFirstName($data['firstName']);
+//        $user->setLastName($data['lastName']);
 
-        return $this->json($user, JsonResponse::HTTP_CREATED, [], ['groups' => 'show_user']);
+        $externalData = $request->getContent();
+        try {
+            $user = $serializer->deserialize($externalData, User::class, 'json');
+            $user->setClient($this->getUser());
+            $errors = $validator->validate($user);
+            if($errors->count()>0) {
+                return $this->json($errors, JsonResponse::HTTP_BAD_REQUEST);
+            }
+            $em->persist($user);
+            $em->flush();
+
+            return $this->json($user, JsonResponse::HTTP_CREATED, [], ['groups' => 'show_user']);
+        }
+        catch (NotEncodableValueException $e) {
+
+            return $this->json([
+                'statut' => 400,
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
 
-    #[Route('/clients/{id}/users/{user_id}', name: 'app_delete_user', methods: ['DELETE'])]
+    #[Route('/users/{user_id}', name: 'app_delete_user', methods: ['DELETE'])]
     #[Entity('user', options: ['id' => 'user_id'])]
-    public function delete(Client $client, User $user, EntityManagerInterface $em): JsonResponse
+    public function delete(User $user, EntityManagerInterface $em): JsonResponse
     {
-        if ($user->getClient() !== $client)
+        if ($user->getClient() !== $this->getUser())
         {
             return $this->json(null, JsonResponse::HTTP_BAD_REQUEST);
         }
@@ -64,6 +84,4 @@ class UserController extends AbstractController
 
         return $this->json(null, JsonResponse::HTTP_NO_CONTENT);
     }
-
-
 }
