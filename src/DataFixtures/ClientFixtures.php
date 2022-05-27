@@ -31,7 +31,6 @@ class ClientFixtures extends Fixture
             $lastTransaction = $faker->dateTimeThisDecade();
             if ( $client->getCreatedAt() < $lastTransaction )
             {
-                $client->setLastTransaction($lastTransaction);
                 $client->setUpdatedAt($lastTransaction);
             }
             $manager->persist($client);
