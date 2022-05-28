@@ -17,15 +17,21 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/api')]
 class UserController extends AbstractController
 {
-    #[Route('/users', name: 'app_collection_user', methods: ['GET'])]
-    public function list(UserRepository $userRepository): JsonResponse
+    #[Route('/users', name: 'user_list', methods: ['GET'])]
+    public function list(Request $request, UserRepository $userRepository): JsonResponse
     {
-        /* faire la pagination , et niveau 3 de Richardson ( negociation ?? ) */
-        $users = $userRepository->findBy(['client' => $this->getUser()]);
+        $page = $request->query->get('page') ?? 1 ;
+        $usersCount = $userRepository->count(['client' => $this->getUser()]);
+        $pageCount = round($usersCount/12);
+        if($usersCount % 12 != 0){$pageCount++;}
+        if ($pageCount < $request->query->get('page')) {
+            $page = 1 ;
+        }
+        $users = $userRepository->findBy(['client' => $this->getUser()], ['id' => 'ASC'], 12, ($page-1)*12);
         return $this->json($users, JsonResponse::HTTP_OK, [], ['groups' => 'list_user']);
     }
 
-    #[Route('/users/{user_id}', name: 'app_item_user', methods: ['GET'])]
+    #[Route('/users/{user_id}', name: 'user_show', methods: ['GET'])]
     #[Entity('user', options: ['id' => 'user_id'])]
     public function show(User $user): JsonResponse
     {
@@ -36,19 +42,13 @@ class UserController extends AbstractController
         return $this->json($user, JsonResponse::HTTP_OK, [], ['groups' => 'show_user']);
     }
 
-    #[Route('/users', name: 'app_create_user', methods: ['POST'])]
+    #[Route('/users', name: 'user_create', methods: ['POST'])]
     public function create(
         SerializerInterface $serializer,
         Request $request,
         EntityManagerInterface $em,
         ValidatorInterface $validator): JsonResponse
     {
-//        $data = $request->toArray();
-//        $user = new User();
-//        $user->setEmail($data['email']);
-//        $user->setFirstName($data['firstName']);
-//        $user->setLastName($data['lastName']);
-
         $externalData = $request->getContent();
         try {
             $user = $serializer->deserialize($externalData, User::class, 'json');
@@ -71,7 +71,7 @@ class UserController extends AbstractController
         }
     }
 
-    #[Route('/users/{user_id}', name: 'app_delete_user', methods: ['DELETE'])]
+    #[Route('/users/{user_id}', name: 'user_delete', methods: ['DELETE'])]
     #[Entity('user', options: ['id' => 'user_id'])]
     public function delete(User $user, EntityManagerInterface $em): JsonResponse
     {
