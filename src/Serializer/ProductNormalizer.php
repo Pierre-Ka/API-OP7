@@ -11,6 +11,7 @@ class ProductNormalizer implements NormalizerInterface
 {
     private $router;
     private $normalizer;
+    protected $type;
 
     public function __construct(UrlGeneratorInterface $router, ObjectNormalizer $normalizer)
     {
@@ -20,25 +21,33 @@ class ProductNormalizer implements NormalizerInterface
 
     public function normalize($product, string $format = null, array $context = [])
     {
-//        dd('ici');
         $data = $this->normalizer->normalize($product, $format, $context);
 
-        // Here, add, edit, or delete some data:
-        $data['__link']['self'] = $this->router->generate('product_show', [
-            'id' => $product->getId(),
-        ], UrlGeneratorInterface::ABSOLUTE_URL);
+        if($this->type === 'list')
+        {
+            $pagination = $this->router->generate('product_list', [
+//                'page' => 2,
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
+            array_unshift($data, $pagination);
+            $data['_link']['self'] = $this->router->generate('product_show', [
+                'id' => $product->getId(),
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        return $data;
+            return $data;
+        }
+        else
+        {
+            $data['_link']['list'] = $this->router->generate('product_list', [], UrlGeneratorInterface::ABSOLUTE_URL);
+            return $data;
+        }
     }
 
     public function supportsNormalization($data, string $format = null, array $context = [])
     {
-//        dd(is_array($data));
-//        dd($data instanceof Product);
-//        dump('avant dump');
-//        dump($data instanceof Product);
-//        dump('apres dump');
-//        return $data instanceof Product;
-        return false;
+        if(is_array($data))
+        {
+            $this->type = 'list';
+        }
+        return $data instanceof Product;
     }
 }

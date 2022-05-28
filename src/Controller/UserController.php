@@ -35,10 +35,11 @@ class UserController extends AbstractController
     #[Entity('user', options: ['id' => 'user_id'])]
     public function show(User $user): JsonResponse
     {
-        if ($user->getClient() !== $this->getUser())
-        {
-            return $this->json(null, JsonResponse::HTTP_BAD_REQUEST);
-        }
+        $this->denyAccessUnlessGranted('view', $user);
+//        if ($user->getClient() !== $this->getUser())
+//        {
+//            return $this->json(null, JsonResponse::HTTP_BAD_REQUEST);
+//        }
         return $this->json($user, JsonResponse::HTTP_OK, [], ['groups' => 'show_user']);
     }
 
@@ -60,6 +61,7 @@ class UserController extends AbstractController
             $em->persist($user);
             $em->flush();
 
+            // Header Location ??
             return $this->json($user, JsonResponse::HTTP_CREATED, [], ['groups' => 'show_user']);
         }
         catch (NotEncodableValueException $e) {
@@ -75,10 +77,11 @@ class UserController extends AbstractController
     #[Entity('user', options: ['id' => 'user_id'])]
     public function delete(User $user, EntityManagerInterface $em): JsonResponse
     {
-        if ($user->getClient() !== $this->getUser())
-        {
-            return $this->json(null, JsonResponse::HTTP_BAD_REQUEST);
-        }
+        $this->denyAccessUnlessGranted('delete', $user);
+//        if ($user->getClient() !== $this->getUser())
+//        {
+//            return $this->json(null, JsonResponse::HTTP_BAD_REQUEST);
+//        }
         $em->remove($user);
         $em->flush();
 

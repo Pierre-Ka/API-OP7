@@ -11,6 +11,7 @@ class UserNormalizer implements NormalizerInterface
 {
     private $router;
     private $normalizer;
+    protected $type;
 
     public function __construct(UrlGeneratorInterface $router, ObjectNormalizer $normalizer)
     {
@@ -22,17 +23,37 @@ class UserNormalizer implements NormalizerInterface
     {
         $data = $this->normalizer->normalize($user, $format, $context);
 
-        // Here, add, edit, or delete some data:
-        $data['__link']['self'] = $this->router->generate('user_show', [
-            'user_id' => $user->getId(),
-        ], UrlGeneratorInterface::ABSOLUTE_URL);
+        if($this->type === 'list')
+        {
+            $pagination = $this->router->generate('user_list', [
+//                'page' => 2,
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
+            $create = $this->router->generate('user_create', [], UrlGeneratorInterface::ABSOLUTE_URL);
+            array_unshift($data, $pagination, $create);
+            $data['_link']['self'] = $this->router->generate('user_show', [
+                'user_id' => $user->getId(),
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
+            $data['_link']['delete'] = 'BE CAREFULL, IT WILL DELETE THE USER :'.$this->router->generate('user_delete', [
+                'user_id' => $user->getId(),
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        return $data;
+            return $data;
+        }
+        else
+        {
+            $data['_link']['list'] = $this->router->generate('user_list', [], UrlGeneratorInterface::ABSOLUTE_URL);
+
+            return $data;
+        }
     }
 
     public function supportsNormalization($data, string $format = null, array $context = [])
     {
-//        return $data instanceof User;
-        return false;
+        if(is_array($data))
+        {
+            $this->type = 'list';
+        }
+
+        return $data instanceof User;
     }
 }
