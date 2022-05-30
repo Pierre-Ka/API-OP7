@@ -22,14 +22,9 @@ class ProductNormalizer implements NormalizerInterface
     public function normalize($product, string $format = null, array $context = [])
     {
         $data = $this->normalizer->normalize($product, $format, $context);
-
         if($this->type === 'list')
         {
-            $pagination = $this->router->generate('product_list', [
-//                'page' => 2,
-            ], UrlGeneratorInterface::ABSOLUTE_URL);
-            array_unshift($data, $pagination);
-            $data['_link']['self'] = $this->router->generate('product_show', [
+            $data['_links']['self'] = $this->router->generate('product_show', [
                 'id' => $product->getId(),
             ], UrlGeneratorInterface::ABSOLUTE_URL);
 
@@ -37,14 +32,13 @@ class ProductNormalizer implements NormalizerInterface
         }
         else
         {
-            $data['_link']['list'] = $this->router->generate('product_list', [], UrlGeneratorInterface::ABSOLUTE_URL);
             return $data;
         }
     }
 
     public function supportsNormalization($data, string $format = null, array $context = [])
     {
-        if(is_array($data))
+        if(in_array($context["groups"], ["list_product", "list_user"]))
         {
             $this->type = 'list';
         }

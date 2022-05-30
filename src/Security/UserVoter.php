@@ -4,7 +4,6 @@ namespace App\Security;
 
 use App\Entity\Client;
 use App\Entity\User;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
@@ -12,11 +11,6 @@ class UserVoter extends Voter
 {
     const VIEW = 'view';
     const DELETE = 'delete';
-//    protected $container;
-//
-//    public function __construct(ContainerInterface $container){
-//        $this->container = $container;
-//    }
 
     protected function supports(string $attribute, $subject): bool
     {
@@ -35,13 +29,6 @@ class UserVoter extends Voter
     {
 
         $client = $token->getUser();
-//        if (!($this->container->has('security.token_storage'))||!($this->container->has('security.token_storage')===null))
-//        {
-//            return false;
-//        }
-//
-//        $client = $this->container->get('security.token_storage')->getToken()->getUser();
-
         if (!$client instanceof Client) {
             return false;
         }
