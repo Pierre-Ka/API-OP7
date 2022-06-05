@@ -1,9 +1,20 @@
 nelmio_api_doc:
+    models: { use_jms: false }
     documentation:
         info:
-            title: My App
-            description: This is an awesome app!
+            title: BileMo phones
+            description: API for BileMo's client
             version: 1.0.0
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+                    name: authorization
+                    in: header
+        security:
+            - Bearer: []
     areas: # to filter documented areas
         path_patterns:
-            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+            - ^/api(?!/(doc|doc.json)$) # Accepts routes under /api except /api/doc

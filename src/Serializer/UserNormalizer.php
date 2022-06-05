@@ -19,7 +19,7 @@ class UserNormalizer implements NormalizerInterface
         $this->normalizer = $normalizer;
     }
 
-    // Comprendre dans le cas de la liste, la fonction normalize est appelé pour chaque user de la liste !
+    // Comprendre dans le cas de la liste, la fonction normalize est appelé pour chaque item de la liste !
     public function normalize($user, string $format = null, array $context = [])
     {
         $data = $this->normalizer->normalize($user, $format, $context);
@@ -46,10 +46,13 @@ class UserNormalizer implements NormalizerInterface
 
     public function supportsNormalization($data, string $format = null, array $context = [])
     {
-        if(in_array($context["groups"], ["list_product", "list_user"]))
+        if(isset($context["groups"]))
         {
-            $this->type = 'list';
+            if (in_array($context["groups"], ["list_product", "list_user"])) {
+                $this->type = 'list';
+            }
+            return $data instanceof User;
         }
-        return $data instanceof User;
+        return false;
     }
 }
