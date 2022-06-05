@@ -6,7 +6,7 @@ https://codeclimate.com/github/Pierre-Ka/API-OP7/maintainability
 Repository GitHub :
 https://github.com/Pierre-Ka/API-OP7
 
-This project consists of an API in order to provide access to the BileMo product catalog. The API should be made in PHP with the Symfony framework and must follow the rules of Level 1, 2 and 3 of the Richardson Maturity Model.
+This project consists of an API in order to provide access to the BileMo product catalog. The API should be made in PHP with the Symfony framework and must follow the rules of Level 1, 2 and 3 of the Richardson Maturity Model. This API had been developed from scratch.
 
 To run the project you will need to have :
 * php 8 
@@ -57,3 +57,5 @@ You can now connect to the API and start send requests.
 
 ***
 ## Documentation
+
+Lets go to YOUR_LOCAL_URL/api/doc to enjoy the api's documentation ! ⚡

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Service;
 
 /*
  * The DisplayListData class helps to display the datas with pagination informations
@@ -10,18 +10,30 @@ use App\Entity\Product;
 use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use OpenApi\Annotations as OA;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
+/**
+ * @OA\Schema()
+ */
 class DisplayListData
 {
     const NUMBER_OF_ITEMS_PER_PAGE = 10;
     private NormalizerInterface $normalizer;
     private UrlGeneratorInterface $router;
 
+    /**
+     * @OA\Property(type="integer")
+     * @var int
+     */
     #[Groups(["list_user", "list_product"])]
     private int $actual_page ;
+    /**
+     * @OA\Property(type="integer")
+     * @var int
+     */
     #[Groups(["list_user", "list_product"])]
     private int $total_pages ;
     #[Groups(["list_user", "list_product"])]
@@ -148,7 +160,7 @@ class DisplayListData
     public function setEmbedded(): void
     {
         $dataArray = $this->normalizer->normalize($this->data, null, ['groups' => 'list_'.$this->dataType]);
-        $this->_embedded[] = $dataArray;
+        $this->_embedded = $dataArray;
     }
 
     public function fillData(array $data): void

@@ -38,10 +38,14 @@ class ProductNormalizer implements NormalizerInterface
 
     public function supportsNormalization($data, string $format = null, array $context = [])
     {
-        if(in_array($context["groups"], ["list_product", "list_user"]))
+        if(isset($context["groups"]))
         {
-            $this->type = 'list';
+            if(in_array($context["groups"], ["list_product", "list_user"]))
+            {
+                $this->type = 'list';
+            }
+            return $data instanceof Product;
         }
-        return $data instanceof Product;
+        return false;
     }
 }

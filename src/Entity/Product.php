@@ -2,11 +2,10 @@
 
 namespace App\Entity;
 
+use App\Entity\Traits\Timestampable;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Traits\Timestampable;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -17,7 +16,7 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[Groups(["list_product", "show_product"])]
+    #[Groups(["list_product", "show_product", "test"])]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
