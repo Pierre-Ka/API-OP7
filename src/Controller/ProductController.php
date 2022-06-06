@@ -18,8 +18,6 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
-//use OpenApi\Attributes as OA;
-
 #[Route('/api')]
 class ProductController extends AbstractController
 {
@@ -63,28 +61,25 @@ class ProductController extends AbstractController
         CacheInterface        $cache
     ): JsonResponse
     {
-        $page = $request->query->get('page') ?? 1;
-//        $result = $cache->get('list_product'.$page, function(ItemInterface $item) use($page, $request, $productRepository, $normalizer, $router)
-//        {
-//            $item->expiresAfter(3600);
-            $productsCount = $productRepository->count([]);
-            $pageCount = round($productsCount / 12);
-            if ($productsCount % 12 != 0) {
-                $pageCount++;
+        $page = $request->query->get('page', 1);
+        return $cache->get('list_product'.$page, function(ItemInterface $item) use($page, $request, $productRepository, $normalizer, $router)
+            {
+                $item->expiresAfter(3600);
+                $productsCount = $productRepository->count([]);
+                $pageCount = ceil($productsCount / 12);
+                if ($pageCount < $page) {
+                    $page = 1;
+                }
+                $products = $productRepository->findBy([], ['createdAt' => 'DESC'], 12, ($page-1)*12);
+                $displayer = new DisplayListData($normalizer, $router);
+                $displayData = $displayer->create($page, $pageCount, $productsCount, $products);
+                return $this->json($displayData, JsonResponse::HTTP_OK, [],
+                    ['groups' => 'list_product']);
             }
-            if ($pageCount < $request->query->get('page')) {
-                $page = 1;
-            }
-            $products = $productRepository->findBy([], ['createdAt' => 'DESC'], 12, ($page - 1) * 12);
-            $displayer = new DisplayListData($normalizer, $router);
-            $displayData = $displayer->create($page, $pageCount, $productsCount, $products);
-//            return $displayData;
-//        });
-        return $this->json($displayData, JsonResponse::HTTP_OK, [],
-            ['groups' => 'list_product']);
+        );
     }
 
-    #[Route('/products/{id<[0-9]+>}', name: 'product_show', methods: ['GET'])]
+    #[Route('/products/{id<\d+>}', name: 'product_show', methods: ['GET'])]
     /**
      * @OA\Response(
      *     response=200,

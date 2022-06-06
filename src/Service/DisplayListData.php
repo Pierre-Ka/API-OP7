@@ -20,7 +20,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  */
 class DisplayListData
 {
-    const NUMBER_OF_ITEMS_PER_PAGE = 10;
+    const NUMBER_OF_ITEMS_PER_PAGE = 12;
     private NormalizerInterface $normalizer;
     private UrlGeneratorInterface $router;
 
@@ -130,24 +130,20 @@ class DisplayListData
         {
             if ($this->actual_page === 1)
             {
-//                $this->router->generate('product_show', [
-//                    'id' => $product->getId(),
-//                ], UrlGeneratorInterface::ABSOLUTE_URL);
-                $this->router->generate($this->dataType.'_list', [ 'page']);
-                $this->_links["next page"] = 'https://localhost:8000/api/'.$this->dataType.'s?page=2';
-                $this->_links["last page"] = 'https://localhost:8000/api/'.$this->dataType.'s?page='.$this->total_pages;
+                $this->_links["next page"] = $this->router->generate($this->dataType.'_list', ['page' => 2], UrlGeneratorInterface::ABSOLUTE_URL);
+                $this->_links["last page"] = $this->router->generate($this->dataType.'_list', ['page' => $this->total_pages], UrlGeneratorInterface::ABSOLUTE_URL);
             }
             elseif ($this->actual_page === $this->total_pages)
             {
-                $this->_links["previous page"] = 'https://localhost:8000/api/'.$this->dataType.'s?page='.($this->total_pages-1);
-                $this->_links["first page"] = 'https://localhost:8000/api/'.$this->dataType.'s?page=1';
+                $this->_links["previous page"] = $this->router->generate($this->dataType.'_list', ['page' => $this->total_pages-1], UrlGeneratorInterface::ABSOLUTE_URL);
+                $this->_links["first page"] = $this->router->generate($this->dataType.'_list', ['page' => 1], UrlGeneratorInterface::ABSOLUTE_URL);
             }
             else
             {
-                $this->_links["next page"] = 'https://localhost:8000/api/'.$this->dataType.'s?page='.($this->actual_page+1);
-                $this->_links["previous page"] = 'https://localhost:8000/api/'.$this->dataType.'s?page='.($this->actual_page-1);
-                $this->_links["last page"] = 'https://localhost:8000/api/'.$this->dataType.'s?page='.$this->total_pages;
-                $this->_links["first page"] = 'https://localhost:8000/api/'.$this->dataType.'s?page=1';
+                $this->_links["next page"] = $this->router->generate($this->dataType.'_list', ['page' => $this->actual_page+1], UrlGeneratorInterface::ABSOLUTE_URL);
+                $this->_links["previous page"] = $this->router->generate($this->dataType.'_list', ['page' => $this->actual_page-1], UrlGeneratorInterface::ABSOLUTE_URL);
+                $this->_links["last page"] = $this->router->generate($this->dataType.'_list', ['page' => $this->total_pages], UrlGeneratorInterface::ABSOLUTE_URL);
+                $this->_links["first page"] = $this->router->generate($this->dataType.'_list', ['page' => 1], UrlGeneratorInterface::ABSOLUTE_URL);
             }
         }
     }
