@@ -22,6 +22,8 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route('/api')]
 class UserController extends AbstractController
@@ -58,29 +60,30 @@ class UserController extends AbstractController
      * @Security(name="Bearer")
      */
     public function list(
-        Request               $request,
-        UserRepository        $userRepository,
-        NormalizerInterface   $normalizer,
-        UrlGeneratorInterface $router,
-        CacheInterface        $cache
+        Request                $request,
+        UserRepository         $userRepository,
+        NormalizerInterface    $normalizer,
+        UrlGeneratorInterface  $router,
+        TagAwareCacheInterface $cache,
     ): JsonResponse
     {
-        $page = $request->query->get('page') ?? 1 ;
-//        $result = $cache->get('list_user'.$page, function(ItemInterface $item) use($page, $request, $userRepository, $normalizer, $router)
-//        {
-//            $item->expiresAfter(3600);
-        $usersCount = $userRepository->count(['client' => $this->getUser()]);
-        $pageCount = round($usersCount/12);
-        if($usersCount % 12 != 0){$pageCount++;}
-        if ($pageCount < $request->query->get('page')) {
-            $page = 1 ;
-        }
-        $users = $userRepository->findBy(['client' => $this->getUser()], ['id' => 'ASC'], 12, ($page-1)*12);
-        $displayer = new DisplayListData($normalizer, $router);
-        $displayData = $displayer->create($page, $pageCount, $usersCount, $users);
-//            return $displayData;
-//        });
-        return $this->json($displayData, JsonResponse::HTTP_OK, [], ['groups' => 'list_user']);
+        $page = $request->query->get('page', 1);
+
+        return $cache->get('list_client_'.$this->getUser()->getId().'_page_'.$page , function(ItemInterface $item) use($page, $request, $userRepository, $normalizer, $router)
+            {
+                $item->expiresAfter(3600);
+                $item->tag('tag'.$this->getUser()->getId());
+                $usersCount = $userRepository->count(['client' => $this->getUser()]);
+                $pageCount = ceil($usersCount/12);
+                if ($pageCount < $page) {
+                    $page = 1 ;
+                }
+                $users = $userRepository->findBy(['client' => $this->getUser()], ['id' => 'ASC'], 12, ($page-1)*12);
+                $displayer = new DisplayListData($normalizer, $router);
+                $displayData = $displayer->create($page, $pageCount, $usersCount, $users);
+                return $this->json($displayData, JsonResponse::HTTP_OK, [], ['groups' => 'list_user']);
+            }
+        );
     }
 
     #[Route('/users/{user_id<[0-9]+>}', name: 'user_show', methods: ['GET'])]
@@ -113,9 +116,10 @@ class UserController extends AbstractController
      * @OA\Tag(name="user")
      * @Security(name="Bearer")
      */
-    public function show(User $user, CacheInterface $cache): JsonResponse
+    public function show(User $user, TagAwareCacheInterface $cache): JsonResponse
     {
         $this->denyAccessUnlessGranted('view', $user);
+
         return $cache->get('user'.$user->getId(), function() use($user){
             return $this->json($user, JsonResponse::HTTP_OK, [], ['groups' => 'show_user']);
         });
@@ -158,7 +162,8 @@ class UserController extends AbstractController
         SerializerInterface    $serializer,
         Request                $request,
         EntityManagerInterface $em,
-        ValidatorInterface     $validator
+        ValidatorInterface     $validator,
+        TagAwareCacheInterface $cache
     ): JsonResponse
     {
         $externalData = $request->getContent();
@@ -170,6 +175,7 @@ class UserController extends AbstractController
         }
         $em->persist($user);
         $em->flush();
+        $cache->invalidateTags(['tag'.$this->getUser()->getId()]);
         $location = $this->generateUrl('user_show', ['user_id'=> $user->getId()]);
 
         return $this->json($user, JsonResponse::HTTP_CREATED, ['Location'=>$location], ['groups' => 'show_user']);
@@ -191,17 +197,22 @@ class UserController extends AbstractController
      *     description="JWT Token not found or expired"
      * )
      *  @OA\Response(
+     *     response=403,
+     *     description="Access Forbidden"
+     * )
+     *  @OA\Response(
      *     response=500,
      *     description="Server Error"
      * )
      * @OA\Tag(name="user")
      * @Security(name="Bearer")
      */
-    public function delete(User $user, EntityManagerInterface $em): JsonResponse
+    public function delete(User $user, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
     {
         $this->denyAccessUnlessGranted('delete', $user);
         $em->remove($user);
         $em->flush();
+        $cache->invalidateTags(['tag'.$this->getUser()->getId()]);
 
         return $this->json(null, JsonResponse::HTTP_NO_CONTENT);
     }
