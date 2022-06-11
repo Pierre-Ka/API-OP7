@@ -58,4 +58,5 @@ You can now connect to the API and start send requests.
 ***
 ## Documentation
 
-Lets go to YOUR_LOCAL_URL/api/doc to enjoy the api's documentation ! ⚡
+Once the project is installed,
+go to : YOUR_LOCAL_URL/api/doc to enjoy the api's documentation ! ⚡

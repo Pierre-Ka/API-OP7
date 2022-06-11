@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[UniqueEntity(fields: ['email'], message: 'Un utilisateur possède dejà cet email !')]
+#[UniqueEntity(fields: ['email'], message: 'This email is already use !')]
 class User
 {
     use Timestampable;
@@ -28,20 +28,20 @@ class User
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups(["list_user", "show_user"])]
-    #[Assert\NotBlank(message: 'L\'utilisateur doit avoir un prenom')]
-    #[Assert\Length(min: 3, minMessage: 'Le prenom n\'est pas assez long', max: 100, maxMessage: 'Le nom doit être inferieur à 100 caractères')]
+    #[Assert\NotBlank(message: 'Please, enter a firstname')]
+    #[Assert\Length(min: 3, minMessage: 'The firstname is too short!', max: 100, maxMessage: 'The firstname cannot excess 100 chars')]
     private string $firstName;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups(["list_user", "show_user"])]
-    #[Assert\NotBlank(message: 'L\'utilisateur doit avoir un nom')]
-    #[Assert\Length(min: 2, minMessage: 'Le nom n\'est pas assez long', max: 100, maxMessage: 'Le nom doit être inferieur à 100 caractères')]
+    #[Assert\NotBlank(message: 'Please, enter a lastname')]
+    #[Assert\Length(min: 2, minMessage: 'The lastname is too short!', max: 100, maxMessage: 'The lastname cannot excess 100 chars')]
     private string $lastName;
 
     #[ORM\Column(type: 'string', length: 255, unique: true)]
     #[Groups(["list_user", "show_user"])]
-    #[Assert\NotBlank(message: 'L\'email doit être renseigné')]
-    #[Assert\Email(message:'Entrer un email valide')]
+    #[Assert\NotBlank(message: 'Please, enter an email')]
+    #[Assert\Email(message:'Please, enter a valid email')]
     private string $email;
 
     public function getId(): ?int

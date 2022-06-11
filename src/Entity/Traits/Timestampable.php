@@ -25,11 +25,11 @@ trait Timestampable
         return $this->createdAt;
     }
 
-//    #[ORM\PrePersist]
-//    public function setCreatedAtValue(): void
-//    {
-//        $this->createdAt = new \DateTime();
-//    }
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = new \DateTime();
+    }
     public function setCreatedAt($createdAt): void
     {
         $this->createdAt = $createdAt;
@@ -40,11 +40,11 @@ trait Timestampable
         return $this->updatedAt;
     }
 
-//    #[ORM\PreUpdate]
-//    public function setUpdatedAtValue(): void
-//    {
-//        $this->updatedAt = new \DateTime();
-//    }
+    #[ORM\PreUpdate]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updatedAt = new \DateTime();
+    }
     public function setUpdatedAt($updatedAt): void
     {
         $this->updatedAt = $updatedAt;

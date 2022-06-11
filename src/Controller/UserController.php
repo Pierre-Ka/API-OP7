@@ -144,8 +144,8 @@ class UserController extends AbstractController
      *      )
      * )
      *  @OA\Response(
-     *     response=404,
-     *     description="No Users yet on the list"
+     *     response=400,
+     *     description="The request cannot be fullfilled due to bad syntax"
      * )
      *  @OA\Response(
      *     response=401,
