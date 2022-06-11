@@ -9,12 +9,11 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class ProductNormalizer implements NormalizerInterface
 {
+    protected $type;
     private $router;
     private $normalizer;
-    protected $type;
 
-    public function __construct(UrlGeneratorInterface $router, ObjectNormalizer $normalizer)
-    {
+    public function __construct(UrlGeneratorInterface $router, ObjectNormalizer $normalizer)  {
         $this->router = $router;
         $this->normalizer = $normalizer;
     }
@@ -22,30 +21,27 @@ class ProductNormalizer implements NormalizerInterface
     public function normalize($product, string $format = null, array $context = [])
     {
         $data = $this->normalizer->normalize($product, $format, $context);
-        if($this->type === 'list')
-        {
-            $data['_links']['self'] = $this->router->generate('product_show', [
-                'id' => $product->getId(),
-            ], UrlGeneratorInterface::ABSOLUTE_URL);
+        if ($this->type === 'list') {
+            $data['_links']['self'] = $this->router->generate('product_show', ['id' => $product->getId()],
+                UrlGeneratorInterface::ABSOLUTE_URL);
 
             return $data;
-        }
-        else
-        {
+        } else {
+
             return $data;
         }
     }
 
     public function supportsNormalization($data, string $format = null, array $context = [])
     {
-        if(isset($context["groups"]))
-        {
-            if(in_array($context["groups"], ["list_product", "list_user"]))
-            {
+        if (isset($context["groups"])) {
+            if (in_array($context["groups"], ["list_product", "list_user"])) {
                 $this->type = 'list';
             }
+
             return $data instanceof Product;
         }
+
         return false;
     }
 }

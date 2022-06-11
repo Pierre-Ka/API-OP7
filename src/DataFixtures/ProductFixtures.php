@@ -10,7 +10,6 @@ use Faker\Factory;
 class ProductFixtures extends Fixture
 {
     public const NUMBER_OF_PRODUCT = 50;
-
     const BRAND = [
         'Samsung',
         'Apple',
@@ -21,9 +20,9 @@ class ProductFixtures extends Fixture
         'Sony',
         'Nokia',
     ];
+
     public function load(ObjectManager $manager): void
     {
-
         $faker = Factory::create('fr_FR');
         for ($i = 0; $i < self::NUMBER_OF_PRODUCT; $i++) {
             $brands = [];

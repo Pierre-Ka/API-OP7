@@ -15,10 +15,11 @@ class UserVoter extends Voter
     protected function supports(string $attribute, $subject): bool
     {
         if (!in_array($attribute, [self::VIEW, self::DELETE])) {
+
             return false;
         }
-
         if (!$subject instanceof User) {
+
             return false;
         }
 
@@ -27,22 +28,22 @@ class UserVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, $subject, TokenInterface $token): bool
     {
-
         $client = $token->getUser();
         if (!$client instanceof Client) {
+
             return false;
         }
 
         /** @var User $user */
         $user = $subject;
-
         switch ($attribute) {
             case self::VIEW:
+
                 return $this->canView($user, $client);
             case self::DELETE:
+
                 return $this->canDelete($user, $client);
         }
-
         throw new \LogicException('This code should not be reached!');
     }
 

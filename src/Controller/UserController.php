@@ -21,7 +21,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
@@ -69,7 +68,8 @@ class UserController extends AbstractController
     {
         $page = $request->query->get('page', 1);
 
-        return $cache->get('list_client_'.$this->getUser()->getId().'_page_'.$page , function(ItemInterface $item) use($page, $request, $userRepository, $normalizer, $router)
+        return $cache->get('list_client_'.$this->getUser()->getId().'_page_'.$page , function(ItemInterface $item)
+            use($page, $request, $userRepository, $normalizer, $router)
             {
                 $item->expiresAfter(3600);
                 $item->tag('tag'.$this->getUser()->getId());
@@ -81,6 +81,7 @@ class UserController extends AbstractController
                 $users = $userRepository->findBy(['client' => $this->getUser()], ['id' => 'ASC'], 12, ($page-1)*12);
                 $displayer = new DisplayListData($normalizer, $router);
                 $displayData = $displayer->create($page, $pageCount, $usersCount, $users);
+
                 return $this->json($displayData, JsonResponse::HTTP_OK, [], ['groups' => 'list_user']);
             }
         );
@@ -116,11 +117,15 @@ class UserController extends AbstractController
      * @OA\Tag(name="user")
      * @Security(name="Bearer")
      */
-    public function show(User $user, TagAwareCacheInterface $cache): JsonResponse
+    public function show(
+        User $user,
+        TagAwareCacheInterface $cache
+    ): JsonResponse
     {
         $this->denyAccessUnlessGranted('view', $user);
 
         return $cache->get('user'.$user->getId(), function() use($user){
+
             return $this->json($user, JsonResponse::HTTP_OK, [], ['groups' => 'show_user']);
         });
     }
@@ -171,6 +176,7 @@ class UserController extends AbstractController
         $user->setClient($this->getUser());
         $errors = $validator->validate($user);
         if($errors->count()>0) {
+
             return $this->json($errors, JsonResponse::HTTP_BAD_REQUEST);
         }
         $em->persist($user);
@@ -207,7 +213,11 @@ class UserController extends AbstractController
      * @OA\Tag(name="user")
      * @Security(name="Bearer")
      */
-    public function delete(User $user, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
+    public function delete(
+        User $user,
+        EntityManagerInterface $em,
+        TagAwareCacheInterface $cache
+    ): JsonResponse
     {
         $this->denyAccessUnlessGranted('delete', $user);
         $em->remove($user);

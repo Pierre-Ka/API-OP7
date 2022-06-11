@@ -17,24 +17,22 @@ use Throwable;
 
 class ExceptionSubscriber implements EventSubscriberInterface
 {
-
     private Security $security;
     private SerializerInterface $serializer;
 
-    public function __construct(SerializerInterface $serializer, Security $security)
-    {
+    public function __construct(SerializerInterface $serializer, Security $security)  {
         $this->security = $security;
         $this->serializer = $serializer;
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             ExceptionEvent::class => 'onException'
         ];
     }
 
-    public function onException(ExceptionEvent $event)
+    public function onException(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
         $response = new Response();
@@ -49,33 +47,33 @@ class ExceptionSubscriber implements EventSubscriberInterface
         return $this->determineStatusCode($exception, $this->security->getUser() !== null);
     }
 
-    private function getErrorMessage(Throwable $exception, Response $response): array
-    {
-        if( get_class($exception) === NotFoundHttpException::class ) {
-            $message = "Item or List not found";
-        }
-        else {
-            $message = $exception->getMessage()  ;
-        }
-
-        $error = [
-            'code' => $response->getStatusCode(),
-            'message' => $message
-        ];
-        return $error;
-    }
-
     private function determineStatusCode(Throwable $exception, bool $isUser): int
     {
         $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
-
         if ($exception instanceof AuthenticationException) {
             $statusCode = Response::HTTP_UNAUTHORIZED;
-        } elseif (in_array(get_class($exception), [AccessDeniedException::class , AccessDeniedHttpException::class])) {
+        } elseif (in_array(get_class($exception), [AccessDeniedException::class, AccessDeniedHttpException::class])) {
             $statusCode = $isUser ? Response::HTTP_FORBIDDEN : Response::HTTP_UNAUTHORIZED;
         } elseif ($exception instanceof HttpExceptionInterface) {
             $statusCode = $exception->getStatusCode();
         }
+
         return $statusCode === 0 ? Response::HTTP_INTERNAL_SERVER_ERROR : $statusCode;
+    }
+
+    private function getErrorMessage(Throwable $exception, Response $response): array
+    {
+        if (get_class($exception) === NotFoundHttpException::class) {
+            $message = "Item or List not found";
+        }
+        else {
+            $message = $exception->getMessage();
+        }
+        $error = [
+            'code' => $response->getStatusCode(),
+            'message' => $message
+        ];
+
+        return $error;
     }
 }

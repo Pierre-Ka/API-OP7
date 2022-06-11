@@ -4,6 +4,6 @@ namespace App\Dto\LinksOutput;
 
 class UserListLink
 {
-        public string $self;
-        public string $delete;
+    public string $self;
+    public string $delete;
 }

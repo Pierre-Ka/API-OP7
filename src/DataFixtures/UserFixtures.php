@@ -17,11 +17,10 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
     {
         $faker = Factory::create('fr_FR');
         for ($i = 0; $i < self::NUMBER_OF_USER; $i++) {
-
             $clientKey = rand(0, (ClientFixtures::NUMBER_OF_CLIENT - 1));
+
             /** @var Client $client */
             $client = $this->getReference('client_' . $clientKey);
-
             $user = new User();
             $user->setClient($client);
             $user->setEmail($faker->email());
@@ -33,8 +32,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
         $manager->flush();
     }
 
-    public function getDependencies(): array
-    {
+    public function getDependencies(): array {
         return [
             ClientFixtures::class,
         ];
