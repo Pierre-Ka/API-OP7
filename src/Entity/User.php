@@ -2,9 +2,9 @@
 
 namespace App\Entity;
 
+use App\Entity\Traits\Timestampable;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Traits\Timestampable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -41,7 +41,7 @@ class User
     #[ORM\Column(type: 'string', length: 255, unique: true)]
     #[Groups(["list_user", "show_user"])]
     #[Assert\NotBlank(message: 'Please, enter an email')]
-    #[Assert\Email(message:'Please, enter a valid email')]
+    #[Assert\Email(message: 'Please, enter a valid email')]
     private string $email;
 
     public function getId(): ?int

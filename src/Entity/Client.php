@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
+use App\Entity\Traits\Timestampable;
 use App\Repository\ClientRepository;
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use App\Entity\Traits\Timestampable;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CLientRepository::class)]
@@ -42,8 +42,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["list_user"])]
     private ?Collection $users = null;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->users = new ArrayCollection();
     }
 
@@ -86,16 +85,19 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = $this->roles;
         $roles[] = 'ROLE_USER';
+
         return array_unique($roles);
     }
 
     public function eraseCredentials()
     {
     }
+
     public function getUserIdentifier(): string
     {
         return $this->email;
     }
+
     public function getUsername(): string
     {
         return $this->email;
@@ -112,6 +114,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
             $this->users[] = $user;
             $user->setClient($this);
         }
+
         return $this;
     }
 
@@ -122,6 +125,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
                 $user->setClient(null);
             }
         }
+
         return $this;
     }
 }

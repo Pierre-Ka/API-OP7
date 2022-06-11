@@ -4,5 +4,5 @@ namespace App\Dto\LinksOutput;
 
 class ProductLink
 {
-        public string $self;
+    public string $self;
 }

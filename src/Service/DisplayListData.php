@@ -2,10 +2,6 @@
 
 namespace App\Service;
 
-/*
- * The DisplayListData class helps to display the datas with pagination informations
- */
-
 use App\Entity\Product;
 use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -29,17 +25,17 @@ class DisplayListData
      * @var int
      */
     #[Groups(["list_user", "list_product"])]
-    private int $actual_page ;
+    private int $actual_page;
     /**
      * @OA\Property(type="integer")
      * @var int
      */
     #[Groups(["list_user", "list_product"])]
-    private int $total_pages ;
+    private int $total_pages;
     #[Groups(["list_user", "list_product"])]
-    private int $total_items ;
+    private int $total_items;
     #[Groups(["list_user", "list_product"])]
-    private int $items_per_page ;
+    private int $items_per_page;
     private ?Collection $data = null;
     private string $dataType;
 
@@ -48,8 +44,7 @@ class DisplayListData
     #[Groups(["list_user", "list_product"])]
     private $_embedded = [];
 
-    public function __construct(NormalizerInterface $normalizer, UrlGeneratorInterface $router)
-    {
+    public function __construct(NormalizerInterface $normalizer, UrlGeneratorInterface $router) {
         $this->normalizer = $normalizer;
         $this->router = $router;
     }
@@ -66,7 +61,24 @@ class DisplayListData
         $this->setLinks();
 
         return $this;
+    }
 
+    public function fillData(array $data): void
+    {
+        foreach ($data as $object) {
+            $this->fillDataByItem($object);
+        }
+    }
+
+    public function fillDataByItem($object): void
+    {
+        if ($object instanceof User || $object instanceof Product) {
+            preg_match('$App\\\\Entity\\\\([^/?&#]+)$', get_class($object), $matches);
+            $this->dataType = strtolower($matches[1]);
+            if (!$this->data->contains($object)) {
+                $this->data[] = $object;
+            }
+        }
     }
 
     public function getActualPage(): int
@@ -126,24 +138,26 @@ class DisplayListData
 
     public function setLinks(): void
     {
-        if ($this->total_pages>=2)
-        {
-            if ($this->actual_page === 1)
-            {
-                $this->_links["next page"] = $this->router->generate($this->dataType.'_list', ['page' => 2], UrlGeneratorInterface::ABSOLUTE_URL);
-                $this->_links["last page"] = $this->router->generate($this->dataType.'_list', ['page' => $this->total_pages], UrlGeneratorInterface::ABSOLUTE_URL);
-            }
-            elseif ($this->actual_page === $this->total_pages)
-            {
-                $this->_links["previous page"] = $this->router->generate($this->dataType.'_list', ['page' => $this->total_pages-1], UrlGeneratorInterface::ABSOLUTE_URL);
-                $this->_links["first page"] = $this->router->generate($this->dataType.'_list', ['page' => 1], UrlGeneratorInterface::ABSOLUTE_URL);
-            }
-            else
-            {
-                $this->_links["next page"] = $this->router->generate($this->dataType.'_list', ['page' => $this->actual_page+1], UrlGeneratorInterface::ABSOLUTE_URL);
-                $this->_links["previous page"] = $this->router->generate($this->dataType.'_list', ['page' => $this->actual_page-1], UrlGeneratorInterface::ABSOLUTE_URL);
-                $this->_links["last page"] = $this->router->generate($this->dataType.'_list', ['page' => $this->total_pages], UrlGeneratorInterface::ABSOLUTE_URL);
-                $this->_links["first page"] = $this->router->generate($this->dataType.'_list', ['page' => 1], UrlGeneratorInterface::ABSOLUTE_URL);
+        if ($this->total_pages >= 2) {
+            if ($this->actual_page === 1) {
+                $this->_links["next page"] = $this->router->generate($this->dataType . '_list', ['page' => 2],
+                    UrlGeneratorInterface::ABSOLUTE_URL);
+                $this->_links["last page"] = $this->router->generate($this->dataType . '_list', ['page' => $this->total_pages],
+                    UrlGeneratorInterface::ABSOLUTE_URL);
+            } elseif ($this->actual_page === $this->total_pages) {
+                $this->_links["previous page"] = $this->router->generate($this->dataType . '_list', ['page' => $this->total_pages - 1],
+                    UrlGeneratorInterface::ABSOLUTE_URL);
+                $this->_links["first page"] = $this->router->generate($this->dataType . '_list', ['page' => 1],
+                    UrlGeneratorInterface::ABSOLUTE_URL);
+            } else {
+                $this->_links["next page"] = $this->router->generate($this->dataType . '_list', ['page' => $this->actual_page + 1],
+                    UrlGeneratorInterface::ABSOLUTE_URL);
+                $this->_links["previous page"] = $this->router->generate($this->dataType . '_list', ['page' => $this->actual_page - 1],
+                    UrlGeneratorInterface::ABSOLUTE_URL);
+                $this->_links["last page"] = $this->router->generate($this->dataType . '_list', ['page' => $this->total_pages],
+                    UrlGeneratorInterface::ABSOLUTE_URL);
+                $this->_links["first page"] = $this->router->generate($this->dataType . '_list', ['page' => 1],
+                    UrlGeneratorInterface::ABSOLUTE_URL);
             }
         }
     }
@@ -155,23 +169,8 @@ class DisplayListData
 
     public function setEmbedded(): void
     {
-        $dataArray = $this->normalizer->normalize($this->data, null, ['groups' => 'list_'.$this->dataType]);
+        $dataArray = $this->normalizer->normalize($this->data, null, ['groups' => 'list_' . $this->dataType]);
         $this->_embedded = $dataArray;
-    }
-
-    public function fillData(array $data): void
-    {
-        foreach($data as $object)
-        {
-            if ($object instanceof User || $object instanceof Product)
-            {
-                preg_match('$App\\\\Entity\\\\([^/?&#]+)$', get_class($object), $matches);
-                $this->dataType = strtolower($matches[1]);
-                if (!$this->data->contains($object)) {
-                    $this->data[] = $object;
-                }
-            }
-        }
     }
 
     public function eraseData(): self
@@ -179,5 +178,4 @@ class DisplayListData
         $this->data[] = null;
         return $this;
     }
-
 }

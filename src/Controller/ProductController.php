@@ -21,7 +21,6 @@ use Symfony\Contracts\Cache\ItemInterface;
 #[Route('/api')]
 class ProductController extends AbstractController
 {
-
     #[Route('/products', name: 'product_list', methods: ['GET'])]
     /**
      * @OA\Response(
@@ -38,15 +37,15 @@ class ProductController extends AbstractController
      *     description="Pagination system",
      *     @OA\Schema(type="integer")
      * )
-     *  @OA\Response(
+     * @OA\Response(
      *     response=404,
      *     description="Return the phones list"
      * )
-     *  @OA\Response(
+     * @OA\Response(
      *     response=401,
      *     description="JWT Token not found or expired"
      * )
-     *  @OA\Response(
+     * @OA\Response(
      *     response=500,
      *     description="Server Error"
      * )
@@ -62,20 +61,22 @@ class ProductController extends AbstractController
     ): JsonResponse
     {
         $page = $request->query->get('page', 1);
-        return $cache->get('list_product'.$page, function(ItemInterface $item) use($page, $request, $productRepository, $normalizer, $router)
-            {
-                $item->expiresAfter(3600);
-                $productsCount = $productRepository->count([]);
-                $pageCount = ceil($productsCount / 12);
-                if ($pageCount < $page) {
-                    $page = 1;
-                }
-                $products = $productRepository->findBy([], ['createdAt' => 'DESC'], 12, ($page-1)*12);
-                $displayer = new DisplayListData($normalizer, $router);
-                $displayData = $displayer->create($page, $pageCount, $productsCount, $products);
-                return $this->json($displayData, JsonResponse::HTTP_OK, [],
-                    ['groups' => 'list_product']);
+
+        return $cache->get('list_product' . $page, function (ItemInterface $item)
+            use ($page, $request, $productRepository, $normalizer, $router) {
+            $item->expiresAfter(3600);
+            $productsCount = $productRepository->count([]);
+            $pageCount = ceil($productsCount / 12);
+            if ($pageCount < $page) {
+                $page = 1;
             }
+            $products = $productRepository->findBy([], ['createdAt' => 'DESC'], 12, ($page - 1) * 12);
+            $displayer = new DisplayListData($normalizer, $router);
+            $displayData = $displayer->create($page, $pageCount, $productsCount, $products);
+
+            return $this->json($displayData, JsonResponse::HTTP_OK, [],
+                ['groups' => 'list_product']);
+        }
         );
     }
 
@@ -89,24 +90,29 @@ class ProductController extends AbstractController
      *        ref=@Model(type=Product::class)
      *     )
      * )
-     *  @OA\Response(
+     * @OA\Response(
      *     response=404,
      *     description="No phone found for this id"
      * )
-     *  @OA\Response(
+     * @OA\Response(
      *     response=401,
      *     description="JWT Token not found or expired"
      * )
-     *  @OA\Response(
+     * @OA\Response(
      *     response=500,
      *     description="Server Error"
      * )
      * @OA\Tag(name="phone")
      * @Security(name="Bearer")
      */
-    public function show(Product $product, CacheInterface $cache): JsonResponse
+    public function show(
+        Product $product,
+        CacheInterface $cache
+    ): JsonResponse
     {
-        return $cache->get('product'.$product->getId(), function() use($product){
+
+        return $cache->get('product' . $product->getId(), function () use ($product) {
+
             return $this->json($product, JsonResponse::HTTP_OK, [], ['groups' => 'show_product']);
         });
     }

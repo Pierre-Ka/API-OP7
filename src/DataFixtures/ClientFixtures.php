@@ -13,8 +13,7 @@ class ClientFixtures extends Fixture
     public const NUMBER_OF_CLIENT = 10;
     private UserPasswordHasherInterface $hasher;
 
-    public function __construct(UserPasswordHasherInterface $hasher)
-    {
+    public function __construct(UserPasswordHasherInterface $hasher) {
         $this->hasher = $hasher;
     }
 
@@ -29,12 +28,11 @@ class ClientFixtures extends Fixture
             $client->setPassword($password);
             $client->setCreatedAt($faker->dateTimeThisDecade());
             $lastTransaction = $faker->dateTimeThisDecade();
-            if ( $client->getCreatedAt() < $lastTransaction )
-            {
+            if ($client->getCreatedAt() < $lastTransaction) {
                 $client->setUpdatedAt($lastTransaction);
             }
             $manager->persist($client);
-            $this->addReference('client_'.$i, $client);
+            $this->addReference('client_' . $i, $client);
         }
         $manager->flush();
     }

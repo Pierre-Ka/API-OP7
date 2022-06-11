@@ -1,7 +1,7 @@
 # BileMo API
 ***
 Analyse CodeClimate :
-https://codeclimate.com/github/Pierre-Ka/API-OP7/maintainability
+https://codeclimate.com/github/Pierre-Ka/API-OP7
 
 Repository GitHub :
 https://github.com/Pierre-Ka/API-OP7
