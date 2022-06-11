@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CLientRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[UniqueEntity(fields: ['email'], message: 'Un client possède dejà cet email !')]
+#[UniqueEntity(fields: ['email'], message: 'This email is already use !')]
 class Client implements UserInterface, PasswordAuthenticatedUserInterface
 {
     use Timestampable;
